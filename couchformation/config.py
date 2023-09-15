@@ -23,8 +23,16 @@ def get_log_dir():
         return C.LOG_DIRECTORY
 
 
-def get_resource_dir(name: str, tag: str):
-    return os.path.join(get_base_dir(), name, tag)
+def get_project_dir(project: str):
+    return os.path.join(get_base_dir(), project)
+
+
+def get_common_dir(project: str, cloud: str):
+    return os.path.join(get_project_dir(project), f"{cloud}_common")
+
+
+def get_resource_dir(project: str, name: str):
+    return os.path.join(get_project_dir(project), name)
 
 
 def str_to_int(value: Union[str, int]) -> int:
@@ -293,3 +301,23 @@ class NodeList:
 
     def ip_csv_list(self):
         return ','.join(self.list_private_ip())
+
+
+@attr.s
+class NodeGroup:
+    mode: Optional[str] = attr.ib(default="generic")
+    region: Optional[str] = attr.ib(default=None)
+    quantity: Optional[str] = attr.ib(default="1")
+    machine_type: Optional[str] = attr.ib(default=None)
+    ssh_key: Optional[str] = attr.ib(default=None)
+    os_id: Optional[str] = attr.ib(default=None)
+    os_version: Optional[str] = attr.ib(default=None)
+    auth_mode: Optional[str] = attr.ib(default="default")
+    data_size: Optional[str] = attr.ib(default="256")
+    root_size: Optional[str] = attr.ib(default="256")
+    services: Optional[str] = attr.ib(default="default")
+
+
+@attr.s
+class NodeGroupList:
+    groups: Optional[List[NodeGroup]] = attr.ib(default=[])

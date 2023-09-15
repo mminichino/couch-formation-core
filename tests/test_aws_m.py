@@ -89,13 +89,13 @@ class Params(object):
 def aws_create_1(args):
     project = Project(args)
     project.create()
-    project.save()
+    # project.save()
 
 
 def aws_add_1(args):
     project = Project(args)
     project.add()
-    project.save()
+    # project.save()
 
 
 def aws_deploy_1(args):

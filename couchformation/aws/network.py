@@ -3,11 +3,21 @@
 
 import logging
 from couchformation.network import NetworkDriver
-from couchformation.aws.driver.network import Network
+from couchformation.aws.driver.base import CloudBase
+from couchformation.aws.driver.network import Network, Subnet
+from couchformation.aws.driver.gateway import InternetGateway
+from couchformation.aws.driver.instance import Instance
+from couchformation.aws.driver.machine import MachineType
+from couchformation.aws.driver.nsg import SecurityGroup
+from couchformation.aws.driver.route import RouteTable
+from couchformation.aws.driver.sshkey import SSHKey
+from couchformation.aws.driver.image import Image
+from couchformation.ssh import SSHUtil
 from couchformation.exec.process import TFRun
 import couchformation.aws.driver.constants as C
 from couchformation.common.config.resources import Output, OutputValue
 from couchformation.config import BaseConfig
+import couchformation.state as STATE
 from couchformation.exception import FatalError
 from couchformation.aws.config.network import (AWSProvider, VPCResource, InternetGatewayResource, RouteEntry, RouteResource, SubnetResource, RTAssociationResource,
                                                SecurityGroupEntry, SGResource, Resources, VPCConfig)
@@ -22,23 +32,30 @@ class AWSNetworkError(FatalError):
 
 class AWSNetwork(object):
 
-    def __init__(self, core: BaseConfig):
-        self.project = core.project
-        self.region = core.region
-        self.auth_mode = core.auth
-        self.profile = core.profile
-        core.common_mode()
+    def __init__(self):
+        self.project = STATE.core.project
+        self.region = STATE.core.region
+        self.auth_mode = STATE.core.auth
+        self.profile = STATE.core.profile
 
         try:
             self.validate()
         except ValueError as err:
             raise AWSNetworkError(err)
 
-        self.aws_network = Network(core)
-        self.runner = TFRun(core)
-
     def create_vpc(self):
-        pass
+        cidr_util = NetworkDriver()
+        vpc_name = f"{self.project}-vpc"
+        ig_name = f"{self.project}-gw"
+        rt_name = f"{self.project}-rt"
+        sg_name = f"{self.project}-sg"
+
+        for net in Network(core).cidr_list:
+            cidr_util.add_network(net)
+
+        vpc_cidr = cidr_util.get_next_network()
+        subnet_list = list(cidr_util.get_next_subnet())
+        zone_list = base.zones()
 
     def config_gen(self):
         cidr_util = NetworkDriver()
